@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Notice Board Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/assets/page.css">
+<style>
+:root{
+  --bg:#f4f5fa; --panel:#ffffff; --ink:#1f2540; --soft:#5f6684; --faint:#9aa0b8; --line:#e2e5ef;
+  --brand:#3f4f86; --brand-soft:#e9ecf7; --pink:#d9418f; --pink-soft:#fde8f3;
+  --ok:#1f8a4c; --ok-soft:#e2f5ea; --warn:#a86400; --warn-soft:#fff3d6; --bad:#c23434; --bad-soft:#fde7e7;
+  --font:"Plus Jakarta Sans","Noto Sans SC",system-ui,sans-serif;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px}
+button{font:inherit;cursor:pointer;color:inherit}
+input,textarea,select{font:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid #9fb0ec;outline-offset:2px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:#c7cce0}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.publish{background:var(--pink);border-color:var(--pink);color:#fff;padding:10px 18px}
+.btn.publish:disabled{background:#e6e8f0;border-color:#e6e8f0;color:var(--faint);cursor:default}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn svg{width:16px;height:16px}
+.iconbtn{width:34px;height:34px;display:inline-grid;place-items:center;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--soft)}
+.iconbtn:hover{color:var(--ink);border-color:#c7cce0}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.iconbtn svg{width:16px;height:16px}
+
+/* login */
+.login{min-height:100%;display:grid;place-items:center;padding:24px}
+.login form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:36px;width:min(420px,100%);box-shadow:0 20px 50px rgba(30,40,80,.08)}
+.login h1{margin:0 0 6px;font-size:24px}
+.login p{margin:0 0 22px;color:var(--soft)}
+.login .err{color:var(--bad);font-weight:600;margin-top:12px}
+
+/* layout */
+.app{height:100%;display:grid;grid-template-rows:auto 1fr}
+.top{display:flex;align-items:center;gap:12px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top .name{font-weight:800;font-size:17px;display:flex;align-items:center;gap:10px;margin-right:auto}
+.top .name i{width:30px;height:30px;border-radius:8px;background:var(--brand);display:inline-grid;place-items:center;color:#fff;font-style:normal;font-size:14px}
+.status{font-size:13px;font-weight:600;color:var(--soft);display:flex;align-items:center;gap:6px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.status.saving .dot{background:var(--warn)}
+.status.error{color:var(--bad)}.status.error .dot{background:var(--bad)}
+.chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.body{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:0}
+nav{background:#fff;border-right:1px solid var(--line);overflow:auto;padding:16px 12px;display:flex;flex-direction:column;gap:2px}
+nav h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:16px 10px 6px}
+nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;cursor:pointer}
+nav a:hover{background:var(--bg)}
+nav a.on{background:var(--brand-soft);color:var(--brand)}
+nav a svg{width:18px;height:18px;flex:none;color:var(--soft)}
+nav a.on svg{color:var(--brand)}
+nav a .hid{margin-left:auto;font-size:11px;color:var(--faint);font-weight:600}
+nav .add{color:var(--brand)}
+main{overflow:auto;padding:28px clamp(16px,3vw,40px) 80px}
+.wrap{max-width:1180px;margin:0 auto}
+.crumbs{font-size:13px;color:var(--soft);margin-bottom:6px}
+.crumbs a{color:var(--brand);cursor:pointer;font-weight:600}
+h2.title{font-size:26px;margin:0 0 4px}
+.lead{color:var(--soft);margin:0 0 22px;max-width:70ch}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.card h3{margin:0 0 4px;font-size:16px}
+.card .hint{color:var(--soft);font-size:13px;margin:0 0 14px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:20px;align-items:start}
+.sticky{position:sticky;top:0}
+
+/* fields */
+.field{margin-bottom:14px}
+.field>label,.lbl{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+.field .sub{font-weight:500;color:var(--faint)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair.one{grid-template-columns:1fr}
+.lang{position:relative}
+.lang span{position:absolute;top:8px;right:10px;font-size:11px;font-weight:700;color:var(--faint);pointer-events:none}
+input[type=text],input[type=password],input[type=number],textarea,select{width:100%;border:1px solid #d5d9e6;border-radius:10px;padding:10px 12px;background:#fff}
+.lang input,.lang textarea{padding-right:56px}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+input:focus,textarea:focus,select:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px var(--brand-soft)}
+.toggle{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer;user-select:none}
+.toggle input{appearance:none;width:42px;height:24px;border-radius:999px;background:#d5d9e6;position:relative;cursor:pointer;flex:none;transition:background .15s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked{background:var(--ok)}
+.toggle input:checked::after{transform:translateX(18px)}
+.toggle small{display:block;font-weight:500;color:var(--soft)}
+.row3{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+/* lists of items */
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.item.off{background:#fafbfd}
+.item.off .ititle{color:var(--faint)}
+.item .ititle{flex:1;min-width:0;font-weight:700;cursor:pointer}
+.item .ititle small{display:block;color:var(--soft);font-weight:500;font-size:13px;margin-top:2px}
+.item .acts{display:flex;gap:6px;align-items:center}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg);color:var(--soft)}
+.badge.off{background:var(--warn-soft);color:var(--warn)}
+.confirm{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:700;color:var(--bad)}
+.emptybox{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--soft)}
+
+/* pages */
+.pagecard{border:1px solid var(--line);border-radius:14px;margin-bottom:14px;background:#fff;overflow:hidden}
+.pagecard.active{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.pagehead{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fafbfd;border-bottom:1px solid var(--line)}
+.pagehead b{flex:1;font-size:14px}
+.pagebody{padding:16px}
+.tablerows{display:flex;flex-direction:column;gap:8px}
+.trow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:start}
+.trow .stack{display:flex;flex-direction:column;gap:6px}
+.addbar{display:flex;gap:8px;flex-wrap:wrap}
+
+/* icon picker */
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.icons button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--soft);font-weight:600}
+.icons button svg{width:28px;height:28px;color:var(--ink)}
+.icons button.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+
+/* uploads */
+.upload{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.thumb{width:160px;height:100px;border-radius:10px;border:1px solid var(--line);background:#f0f2f8 center/contain no-repeat;display:grid;place-items:center;color:var(--faint);font-size:12px;font-weight:600}
+.thumb.wide{width:240px;height:150px;background-size:cover}
+
+/* flags & colours */
+.flag{width:44px;height:44px;border-radius:50%;overflow:hidden;display:flex;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line);flex:none}
+.swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=color]{width:44px;height:36px;border:1px solid #d5d9e6;border-radius:8px;padding:2px;background:#fff;cursor:pointer}
+.preset{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+
+/* preview */
+.preview{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.preview .ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px;color:var(--soft)}
+.preview .ph .seg{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.preview .ph .seg button{border:0;background:#fff;padding:5px 10px;font-size:12px;font-weight:700;color:var(--soft)}
+.preview .ph .seg button.on{background:var(--brand);color:#fff}
+.preview .pb{padding:26px 28px;min-height:260px;max-height:70vh;overflow:auto}
+.preview .pb.docpage h2{font-size:24px}
+.preview .pb.docpage p,.preview .pb.docpage li{font-size:15px}
+.preview .pf{padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);display:flex;justify-content:space-between}
+.minikiosk{border-radius:12px;padding:16px;color:#fff;font-weight:700;font-size:13px}
+.minikiosk .mt{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.minikiosk .mt div{aspect-ratio:1.25;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:10px;text-align:center;padding:4px}
+.minikiosk .mt svg{width:20px;height:20px;display:block;margin:0 auto 4px}
+.minikiosk .mb{display:inline-block;margin-top:12px;padding:6px 12px;border-radius:8px;font-size:11px}
+
+/* history / feedback tables */
+table.data{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.data th,table.data td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+table.data th{font-size:12px;color:var(--soft);text-transform:uppercase;letter-spacing:.05em}
+.bars{display:flex;gap:10px;align-items:flex-end;height:120px;margin:10px 0 4px}
+.bars div{flex:1;background:var(--brand);border-radius:6px 6px 0 0;min-height:2px}
+.barlbl{display:flex;gap:10px}.barlbl span{flex:1;text-align:center;font-size:24px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2540;color:#fff;padding:12px 16px;border-radius:12px;display:flex;gap:14px;align-items:center;font-weight:600;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast button{background:#fff;color:#1f2540;border:0;border-radius:8px;padding:6px 12px;font-weight:700}
+.overlay{position:fixed;inset:0;background:rgba(20,25,50,.45);display:grid;place-items:center;z-index:60;padding:16px}
+.modal{background:#fff;border-radius:16px;padding:26px;width:min(480px,100%)}
+.modal h3{margin:0 0 8px;font-size:20px}
+.modal p{color:var(--soft);margin:0 0 18px}
+.modal .acts{display:flex;gap:10px;justify-content:flex-end}
+
+@media (max-width:980px){.split{grid-template-columns:1fr}.sticky{position:static}}
+@media (max-width:760px){.body{grid-template-columns:1fr}nav{border-right:0;border-bottom:1px solid var(--line);max-height:40vh}.pair{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="login" hidden>
+  <form id="loginForm">
+    <h1>Notice Board Admin</h1>
+    <p>Log in to update what the touch screen shows.</p>
+    <div class="field"><label for="pw">Password</label><input type="password" id="pw" autocomplete="current-password" required></div>
+    <button class="btn primary" style="width:100%;justify-content:center;padding:12px" id="loginBtn">Log in</button>
+    <div class="err" id="loginErr" hidden></div>
+  </form>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" hidden>
+  <header class="top">
+    <div class="name"><i>NB</i>Notice Board Admin</div>
+    <span class="status" id="saveStatus"><span class="dot"></span><span>All changes saved</span></span>
+    <span class="chip warn" id="unpub" hidden>Changes not on the screen yet</span>
+    <span class="chip ok" id="live" hidden>Screen is up to date</span>
+    <button class="btn" id="previewBtn" title="See your changes on a full-size screen before publishing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
+    <button class="btn publish" id="publishBtn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Publish to screen</button>
+    <button class="btn ghost" id="logoutBtn">Log out</button>
+  </header>
+  <div class="body">
+    <nav id="nav"></nav>
+    <main><div class="wrap" id="view"></div></main>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastBtn" hidden>Undo</button></div>
+<div class="overlay" id="modal" hidden><div class="modal"><h3 id="mTitle"></h3><p id="mText"></p><div class="acts"><button class="btn" id="mNo">Cancel</button><button class="btn primary" id="mYes">OK</button></div></div></div>
+<input type="file" id="filePick" accept="image/*" hidden>
+
+<script src="/assets/common.js"></script>
+<script>
+const {esc,pick,icon,flag,renderPage,ICONS,ICON_NAMES}=TNB;
+const $=id=>document.getElementById(id);
+const SVG={
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>',
+  bin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg>'
+};
+
+/* ---------------- state ---------------- */
+let token=null, D=null, publishedJSON="", route={v:"home"}, previewLang="en", activePage=0;
+const undoStack=[];
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+const T=(en="",zh="")=>({en,zh});
+const strip=c=>{if(!c)return"";const {updatedAt,publishedAt,...rest}=c;return JSON.stringify(rest);};
+const zhOn=()=>D.settings.showLanguageButton!==false;
+
+/* ---------------- api ---------------- */
+async function api(path,opts={}){
+  const r=await fetch("/api/"+path,{...opts,headers:{...(opts.headers||{}),...(token?{authorization:"Bearer "+token}:{})}});
+  if(r.status===401&&path!=="login"){logout("Your session ended. Please log in again.");throw new Error("401");}
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||"Something went wrong.");
+  return data;
+}
+
+/* ---------------- login ---------------- */
+$("loginForm").onsubmit=async e=>{
+  e.preventDefault(); $("loginErr").hidden=true; $("loginBtn").disabled=true;
+  try{const r=await api("login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:$("pw").value})});
+    token=r.token; try{localStorage.setItem("tnb_token",token)}catch(e){} await start();
+  }catch(err){$("loginErr").textContent=err.message;$("loginErr").hidden=false;}
+  $("loginBtn").disabled=false;
+};
+function logout(msg){token=null;try{localStorage.removeItem("tnb_token")}catch(e){}$("app").hidden=true;$("login").hidden=false;if(msg){$("loginErr").textContent=msg;$("loginErr").hidden=false;}}
+$("logoutBtn").onclick=()=>logout();
+
+async function start(){
+  let pub=null, draft=null;
+  try{pub=await api("content");}catch(e){}
+  try{draft=await api("content?draft=1");}catch(e){if(e.message==="401")return;}
+  if(!draft){draft=await (await fetch("/content.json",{cache:"no-store"})).json();}
+  D=draft; publishedJSON=pub?strip(pub):"";
+  $("login").hidden=true;$("app").hidden=false;
+  if(!pub) await save(true);
+  render(); updatePublishState();
+}
+(async()=>{
+  try{token=localStorage.getItem("tnb_token")}catch(e){}
+  if(token){try{await api("session");await start();return;}catch(e){}}
+  $("login").hidden=false;
+})();
+
+/* ---------------- saving ---------------- */
+let saveTimer=null;
+function setStatus(kind,text){const s=$("saveStatus");s.className="status "+kind;s.lastElementChild.textContent=text;}
+function changed(){setStatus("saving","Saving…");clearTimeout(saveTimer);saveTimer=setTimeout(()=>save(),700);updatePublishState();}
+async function save(silent){
+  try{const r=await api("draft",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(D)});D.updatedAt=r.updatedAt;setStatus("","All changes saved");}
+  catch(e){if(e.message!=="401")setStatus("error","Couldn't save. Check your internet connection.");}
+  updatePublishState();
+}
+function updatePublishState(){
+  const dirty=strip(D)!==publishedJSON;
+  $("publishBtn").disabled=!dirty;$("unpub").hidden=!dirty;$("live").hidden=dirty;
+}
+$("publishBtn").onclick=async()=>{
+  clearTimeout(saveTimer); await save();
+  $("publishBtn").disabled=true; setStatus("saving","Publishing…");
+  try{const r=await api("publish",{method:"POST"});D.publishedAt=r.publishedAt;publishedJSON=strip(D);setStatus("","Published");toast("Published. The screen will update within a minute.");}
+  catch(e){setStatus("error",e.message);}
+  updatePublishState();
+};
+$("previewBtn").onclick=async()=>{clearTimeout(saveTimer);await save();window.open("/?preview=1","tnb_preview");};
+
+/* ---------------- helpers ---------------- */
+function getAt(path){return path.split(".").reduce((o,k)=>o?.[k],D);}
+function setAt(path,val){const ks=path.split(".");const last=ks.pop();const o=ks.reduce((o,k)=>o[k],D);o[last]=val;}
+function snapshot(label){undoStack.push({json:JSON.stringify(D),route:{...route}});if(undoStack.length>30)undoStack.shift();}
+function toast(msg,undo){
+  $("toastMsg").textContent=msg;$("toastBtn").hidden=!undo;$("toast").hidden=false;
+  clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").hidden=true,undo?8000:3500);
+}
+$("toastBtn").onclick=()=>{const s=undoStack.pop();if(!s)return;D=JSON.parse(s.json);route=s.route;render();changed();$("toast").hidden=true;};
+function ask(title,text,yes="OK"){return new Promise(res=>{$("mTitle").textContent=title;$("mText").textContent=text;$("mYes").textContent=yes;$("modal").hidden=false;
+  $("mYes").onclick=()=>{$("modal").hidden=true;res(true)};$("mNo").onclick=()=>{$("modal").hidden=true;res(false)};});}
+function move(arr,i,d){const j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
+
+// bilingual input
+function L(path,label,opts={}){
+  const v=getAt(path)||{}, multi=opts.multi, ph=opts.ph||"";
+  const tag=(lang,val,phx)=>multi
+    ?`<div class="lang"><textarea data-path="${path}.${lang}" placeholder="${esc(phx)}" rows="${opts.rows||6}">${esc(val||"")}</textarea><span>${lang==="en"?"EN":"中文"}</span></div>`
+    :`<div class="lang"><input type="text" data-path="${path}.${lang}" value="${esc(val||"")}" placeholder="${esc(phx)}"><span>${lang==="en"?"EN":"中文"}</span></div>`;
+  return `<div class="field"><label>${label}${opts.optional?' <span class="sub">(optional)</span>':""}</label>
+    <div class="pair ${zhOn()?"":"one"}">${tag("en",v.en,ph)}${zhOn()?tag("zh",v.zh,opts.phz||"中文翻译（可选）"):""}</div>${opts.hint?`<div class="hint" style="font-size:12px;color:var(--soft);margin-top:6px">${opts.hint}</div>`:""}</div>`;
+}
+function toggle(path,label,sub){const v=getAt(path)!==false;return `<label class="toggle"><input type="checkbox" data-bool="${path}" ${v?"checked":""}><span>${label}${sub?`<small>${sub}</small>`:""}</span></label>`;}
+
+/* ---------------- navigation ---------------- */
+function go(r){route=r;activePage=0;render();document.querySelector("main").scrollTop=0;}
+function renderNav(){
+  const on=(v,id)=>route.v===v&&(!id||route.id===id)?"on":"";
+  const cats=D.categories.map(c=>`<a class="${route.v!=="home"&&route.cat===c.id?"on":""}" data-go="cat" data-id="${c.id}">${icon(c.icon)}<span>${esc(c.name.en||"Untitled")}</span>${c.visible===false?'<span class="hid">hidden</span>':""}</a>`).join("");
+  $("nav").innerHTML=`
+    <a class="${on("home")}" data-go="home">${SVG.home}Home screen &amp; look</a>
+    <a class="${on("countries")}" data-go="countries">${SVG.flag}Countries</a>
+    <h4>Categories (tiles)</h4>${cats}
+    <a class="add" data-act="addCat">${SVG.plus}Add a category</a>
+    <h4>More</h4>
+    <a class="${on("history")}" data-go="history">${SVG.hist}Past versions</a>
+    <a class="${on("feedback")}" data-go="feedback">${SVG.chart}Feedback results</a>
+    <a class="${on("help")}" data-go="help">${SVG.help}Help</a>`;
+}
+$("nav").addEventListener("click",e=>{
+  const a=e.target.closest("a");if(!a)return;
+  if(a.dataset.act==="addCat")return act("addCat");
+  if(a.dataset.go==="cat")go({v:"cat",cat:a.dataset.id});else go({v:a.dataset.go});
+});
+
+function render(){renderNav();const v=VIEWS[route.v]||VIEWS.home;$("view").innerHTML=v();afterRender();}
+function afterRender(){updatePreview();}
+
+/* ---------------- views ---------------- */
+const VIEWS={
+home(){
+  const s=D.settings;
+  return `<h2 class="title">Home screen &amp; look</h2><p class="lead">Your name and logo, the welcome text, the main picture and the colours. Changes save automatically; press <b>Publish to screen</b> when you're happy.</p>
+  <div class="split"><div>
+  <div class="card"><h3>Your brand</h3><p class="hint">Shown at the top right of every screen and on every document.</p>
+    <div class="field"><label>Name</label><input type="text" data-path="settings.brandName" value="${esc(s.brandName||"")}"></div>
+    <div class="field"><label>Logo <span class="sub">(optional, PNG with a transparent background works best)</span></label>
+      <div class="upload"><div class="thumb" style="${s.logo?`background-image:url('${esc(s.logo)}')`:""}">${s.logo?"":"No logo"}</div>
+      <button class="btn" data-act="upload" data-path="settings.logo" data-kind="logo">${SVG.plus}${s.logo?"Change logo":"Upload logo"}</button>${s.logo?`<button class="btn danger" data-act="clear" data-path="settings.logo">Remove</button>`:""}</div></div>
+  </div>
+  <div class="card"><h3>Welcome text</h3>
+    ${L("settings.welcome","Heading at the top of the start screen")}
+    ${L("settings.tapPrompt","Instruction next to the country flags")}
+  </div>
+  <div class="card"><h3>Main picture</h3><p class="hint">The big picture on the start screen. Use a landscape photo. Without one, the screen shows an animated harbour drawing.</p>
+    <div class="upload"><div class="thumb wide" style="${s.heroImage?`background-image:url('${esc(s.heroImage)}')`:""}">${s.heroImage?"":"Animated drawing"}</div>
+    <button class="btn" data-act="upload" data-path="settings.heroImage" data-kind="photo">${SVG.plus}${s.heroImage?"Change picture":"Upload picture"}</button>${s.heroImage?`<button class="btn danger" data-act="clear" data-path="settings.heroImage">Remove</button>`:""}</div>
+    <div style="margin-top:14px">${L("settings.heroCaption","Small label on the picture",{optional:true})}</div>
+  </div>
+  <div class="card"><h3>Colours</h3>
+    <div class="field"><label>Background</label><div class="swatches"><input type="color" data-path="settings.colors.background" value="${esc(s.colors?.background||"#3f4f86")}">
+      ${["#3f4f86","#1f3b5c","#2d5a4a","#5a2d4f","#3a3a3a","#7a2e2e"].map(c=>`<button class="preset" style="background:${c}" data-act="color" data-path="settings.colors.background" data-val="${c}" title="${c}"></button>`).join("")}</div></div>
+    <div class="field"><label>Buttons</label><div class="swatches"><input type="color" data-path="settings.colors.button" value="${esc(s.colors?.button||"#ef5fa7")}">
+      ${["#ef5fa7","#e8743b","#2e9e6b","#2d7be0","#d23b3b","#8a5cd6"].map(c=>`<button class="preset" style="background:${c}" data-act="color" data-path="settings.colors.button" data-val="${c}" title="${c}"></button>`).join("")}</div></div>
+  </div>
+  <div class="card"><h3>How the screen behaves</h3>
+    <div class="field">${toggle("settings.showLanguageButton","Show the 中文 / English button","Turn off for English only. The Chinese boxes disappear from this page too.")}</div>
+    <div class="field">${toggle("settings.skipCountryStep","Skip the country step","Turn on to start straight on the category tiles.")}</div>
+    <div class="field" style="max-width:320px"><label>Go back to the start after no one has touched it for</label>
+      <select data-path="settings.idleSeconds" data-num="1">${[30,45,60,90,120,180].map(n=>`<option value="${n}" ${+s.idleSeconds===n?"selected":""}>${n<60?n+" seconds":n/60+(n===60?" minute":" minutes")}</option>`).join("")}</select></div>
+  </div>
+  </div><div class="sticky">${previewShell("Start screen")}</div></div>`;
+},
+countries(){
+  return `<h2 class="title">Countries</h2><p class="lead">The flags people tap on the start screen. Each country shows the same categories. If you only need one, turn on <b>Skip the country step</b> on the Home screen page.</p>
+  <div class="card"><div class="items">${D.countries.map((c,i)=>`
+   <div class="item ${c.visible===false?"off":""}" style="flex-wrap:wrap">
+     ${flag(c)}
+     <div style="flex:1;min-width:260px">${L(`countries.${i}.name`,"Name")}</div>
+     <div style="min-width:220px"><div class="lbl">Flag colours</div><div class="swatches">
+       ${[0,1,2].map(k=>`<input type="color" data-path="countries.${i}.stripes.${k}" value="${esc(c.stripes?.[k]||"#ffffff")}" title="Stripe ${k+1}">`).join("")}
+       <select data-path="countries.${i}.direction" style="width:auto"><option value="vertical" ${c.direction!=="horizontal"?"selected":""}>Stripes ┃┃┃</option><option value="horizontal" ${c.direction==="horizontal"?"selected":""}>Stripes ☰</option></select></div></div>
+     <div class="acts">${toggle(`countries.${i}.visible`,"Show")}
+       <button class="iconbtn" data-act="mv" data-list="countries" data-i="${i}" data-d="-1" ${i===0?"disabled":""} title="Move up">${SVG.up}</button>
+       <button class="iconbtn" data-act="mv" data-list="countries" data-i="${i}" data-d="1" ${i===D.countries.length-1?"disabled":""} title="Move down">${SVG.down}</button>
+       <button class="iconbtn" data-act="del" data-list="countries" data-i="${i}" data-name="${esc(c.name.en)}" title="Delete">${SVG.bin}</button></div>
+   </div>`).join("")||'<div class="emptybox">No countries. The screen will start on the category tiles.</div>'}</div>
+   <div style="margin-top:14px"><button class="btn primary" data-act="addCountry">${SVG.plus}Add a country</button></div></div>`;
+},
+cat(){
+  const ci=D.categories.findIndex(c=>c.id===route.cat); const c=D.categories[ci];
+  if(!c){route={v:"home"};return VIEWS.home();}
+  const base=`categories.${ci}`;
+  const docs=c.docs||[];
+  return `<div class="crumbs">Categories</div><h2 class="title">${esc(c.name.en||"Untitled category")}</h2>
+  <p class="lead">${c.kind==="feedback"?"This tile lets people rate their visit with a face. The results appear under <b>Feedback results</b>.":"This tile opens a list of items. Each item has one or more pages that people swipe through."}</p>
+  <div class="split"><div>
+  <div class="card"><h3>Tile</h3>
+    ${L(base+".name","Name on the tile")}
+    <div class="field"><label>Picture on the tile</label><div class="icons">${Object.keys(ICONS).map(k=>`<button class="${c.icon===k?"on":""}" data-act="icon" data-path="${base}.icon" data-val="${k}">${icon(k)}${ICON_NAMES[k]}</button>`).join("")}</div></div>
+    <div class="row3">${toggle(base+".visible","Show this tile on the screen")}
+      <span style="margin-left:auto;display:flex;gap:6px">
+      <button class="iconbtn" data-act="mv" data-list="categories" data-i="${ci}" data-d="-1" ${ci===0?"disabled":""} title="Move earlier">${SVG.up}</button>
+      <button class="iconbtn" data-act="mv" data-list="categories" data-i="${ci}" data-d="1" ${ci===D.categories.length-1?"disabled":""} title="Move later">${SVG.down}</button>
+      <button class="btn danger small" data-act="del" data-list="categories" data-i="${ci}" data-name="${esc(c.name.en)}">${SVG.bin}Delete category</button></span></div>
+  </div>
+  ${c.kind==="feedback"?`<div class="card"><h3>Wording</h3>${L(base+".question","Question")}${L(base+".thanks","Thank-you message")}</div>`:`
+  <div class="card"><h3>Items in this category</h3><p class="hint">${docs.length===1?"With only one item, tapping the tile opens it straight away.":"People see these as a list with <b>View details</b> buttons."}</p>
+    <div class="items">${docs.map((d,i)=>`
+      <div class="item ${d.visible===false?"off":""}">
+        <div class="ititle" data-act="openDoc" data-i="${i}">${esc(d.title.en||"Untitled item")}<small>${(d.pages||[]).length} page${(d.pages||[]).length===1?"":"s"}${d.subtitle?.en?" · "+esc(d.subtitle.en):""}</small></div>
+        <div class="acts">${d.visible===false?'<span class="badge off">Hidden</span>':""}
+          <button class="iconbtn" data-act="mv" data-list="${base}.docs" data-i="${i}" data-d="-1" ${i===0?"disabled":""} title="Move up">${SVG.up}</button>
+          <button class="iconbtn" data-act="mv" data-list="${base}.docs" data-i="${i}" data-d="1" ${i===docs.length-1?"disabled":""} title="Move down">${SVG.down}</button>
+          <button class="btn small" data-act="openDoc" data-i="${i}">${SVG.edit}Edit</button>
+          <button class="iconbtn" data-act="del" data-list="${base}.docs" data-i="${i}" data-name="${esc(d.title.en)}" title="Delete">${SVG.bin}</button></div>
+      </div>`).join("")||'<div class="emptybox">No items yet. Add the first one below.</div>'}</div>
+    <div style="margin-top:14px"><button class="btn primary" data-act="addDoc">${SVG.plus}Add an item</button></div>
+  </div>`}
+  </div><div class="sticky">${previewShell("Tiles on the screen")}</div></div>`;
+},
+doc(){
+  const ci=D.categories.findIndex(c=>c.id===route.cat); const c=D.categories[ci];
+  const di=c?(c.docs||[]).findIndex(d=>d.id===route.doc):-1; const d=c?.docs?.[di];
+  if(!d){route={v:"cat",cat:route.cat};return VIEWS.cat();}
+  const base=`categories.${ci}.docs.${di}`;
+  if(activePage>=d.pages.length)activePage=Math.max(0,d.pages.length-1);
+  return `<div class="crumbs"><a data-act="backCat">${esc(c.name.en)}</a> › Item</div><h2 class="title">${esc(d.title.en||"Untitled item")}</h2>
+  <p class="lead">Fill in the boxes. The preview on the right shows exactly how the page will look on the screen.</p>
+  <div class="split"><div>
+  <div class="card"><h3>In the list</h3>
+    ${L(base+".title","Title")}
+    ${L(base+".subtitle","Short description under the title",{optional:true})}
+    ${toggle(base+".visible","Show this item on the screen","Turn off to hide it without deleting it.")}
+  </div>
+  <h3 style="margin:22px 0 10px">Pages <span class="badge">${d.pages.length}</span></h3>
+  ${d.pages.map((p,i)=>pageEditor(p,i,base,d.pages.length)).join("")||'<div class="emptybox" style="margin-bottom:14px">No pages yet. Add one below.</div>'}
+  <div class="card"><h3>Add a page</h3><p class="hint">People move between pages with the Previous and Next buttons.</p>
+    <div class="addbar"><button class="btn primary" data-act="addPage" data-type="text">${SVG.plus}Text page</button>
+    <button class="btn" data-act="addPage" data-type="table">${SVG.plus}Price list / table</button>
+    <button class="btn" data-act="addPage" data-type="image">${SVG.plus}Picture or poster</button></div></div>
+  </div><div class="sticky">${previewShell("Page "+(activePage+1)+" of "+Math.max(1,d.pages.length))}</div></div>`;
+},
+history(){
+  setTimeout(loadHistory);
+  return `<h2 class="title">Past versions</h2><p class="lead">Every time you publish, a copy is kept (the last 20). If something goes wrong, restore an earlier version, check it, then press <b>Publish to screen</b>.</p>
+  <div class="card" id="histBox">Loading…</div>`;
+},
+feedback(){
+  setTimeout(loadFeedback);
+  return `<h2 class="title">Feedback results</h2><p class="lead">How visitors rated their visit on the screen.</p><div class="card" id="fbBox">Loading…</div>`;
+},
+help(){
+  return `<h2 class="title">Help</h2><p class="lead">Everything you need to keep the screen up to date.</p>
+  <div class="card"><h3>How it works</h3><ol style="line-height:1.8;margin:0;padding-left:20px">
+   <li>Make your changes. They save automatically (see "All changes saved" at the top).</li>
+   <li>Press <b>Preview</b> to see them on a full-size screen. Only you can see the preview.</li>
+   <li>Press <b>Publish to screen</b>. The touch screen updates within about a minute.</li></ol></div>
+  <div class="card"><h3>Writing text pages</h3><ul style="line-height:1.8;margin:0;padding-left:20px">
+   <li>Leave an empty line to start a new paragraph.</li>
+   <li>Start a line with a dash and a space (<b>- </b>) to make a bullet point.</li>
+   <li>The 中文 boxes are optional. If you leave them empty, the English text is shown.</li></ul></div>
+  <div class="card"><h3>Made a mistake?</h3><ul style="line-height:1.8;margin:0;padding-left:20px">
+   <li>After deleting something, press <b>Undo</b> in the black message at the bottom.</li>
+   <li>To go back further, open <b>Past versions</b> and restore one.</li>
+   <li>To hide something for a while, switch off <b>Show</b> rather than deleting it.</li></ul></div>`;
+}
+};
+
+function pageEditor(p,i,base,n){
+  const pb=`${base}.pages.${i}`;
+  const label={text:"Text page",table:"Price list / table",image:"Picture or poster"}[p.type]||"Page";
+  let body="";
+  if(p.type==="table"){
+    body=`${L(pb+".heading","Heading")}
+    <div class="lbl">Column titles</div><div class="trow" style="margin-bottom:10px"><div class="stack">${miniL(pb+".col1")}</div><div class="stack">${miniL(pb+".col2")}</div><span style="width:34px"></span></div>
+    <div class="lbl">Rows <span class="sub" style="font-weight:500;color:var(--faint)">(leave 中文 empty where it's the same, e.g. prices)</span></div><div class="tablerows">${(p.rows||[]).map((r,k)=>`<div class="trow"><div class="stack">${miniL(`${pb}.rows.${k}.a`)}</div><div class="stack">${miniL(`${pb}.rows.${k}.b`)}</div>
+      <button class="iconbtn" data-act="delRow" data-path="${pb}.rows" data-i="${k}" title="Remove row">${SVG.bin}</button></div>`).join("")}</div>
+    <div style="margin:10px 0 14px"><button class="btn small" data-act="addRow" data-path="${pb}.rows">${SVG.plus}Add a row</button></div>
+    ${L(pb+".note","Small print under the table",{optional:true})}`;
+  } else if(p.type==="image"){
+    body=`${L(pb+".heading","Heading",{optional:true})}
+    <div class="field"><label>Picture</label><div class="upload"><div class="thumb wide" style="${p.src?`background-image:url('${esc(p.src)}');background-size:contain`:""}">${p.src?"":"No picture yet"}</div>
+      <button class="btn primary" data-act="upload" data-path="${pb}.src" data-kind="photo">${SVG.plus}${p.src?"Change picture":"Upload picture"}</button></div>
+      <div style="font-size:12px;color:var(--soft);margin-top:6px">Got a PDF poster? Save or export it as a JPG or PNG first, then upload that.</div></div>
+    ${L(pb+".caption","Caption",{optional:true})}`;
+  } else {
+    body=`${L(pb+".heading","Heading")}
+    ${L(pb+".body","Text",{multi:true,ph:"Write here.\n\nLeave an empty line for a new paragraph.\n- Start a line with a dash for a bullet point",hint:"Empty line = new paragraph. Start a line with <b>- </b> for a bullet point."})}
+    ${L(pb+".note","Small print at the bottom",{optional:true})}`;
+  }
+  return `<div class="pagecard ${i===activePage?"active":""}" data-page="${i}"><div class="pagehead"><b>Page ${i+1} · ${label}</b>
+    <button class="iconbtn" data-act="mv" data-list="${base}.pages" data-i="${i}" data-d="-1" ${i===0?"disabled":""} title="Move earlier">${SVG.up}</button>
+    <button class="iconbtn" data-act="mv" data-list="${base}.pages" data-i="${i}" data-d="1" ${i===n-1?"disabled":""} title="Move later">${SVG.down}</button>
+    <button class="iconbtn" data-act="del" data-list="${base}.pages" data-i="${i}" data-name="page ${i+1}" title="Delete page">${SVG.bin}</button></div>
+    <div class="pagebody">${body}</div></div>`;
+}
+function miniL(path){const v=getAt(path)||{};return `<div class="lang"><input type="text" data-path="${path}.en" value="${esc(v.en||"")}"><span>EN</span></div>${zhOn()?`<div class="lang"><input type="text" data-path="${path}.zh" value="${esc(v.zh||"")}" placeholder="中文（可选）"><span>中文</span></div>`:""}`;}
+
+/* ---------------- preview ---------------- */
+function previewShell(title){
+  return `<div class="preview"><div class="ph">PREVIEW · <span id="pvTitle">${esc(title)}</span>${zhOn()?`<div class="seg"><button data-pl="en" class="${previewLang==="en"?"on":""}">EN</button><button data-pl="zh" class="${previewLang==="zh"?"on":""}">中文</button></div>`:""}</div>
+  <div class="pb" id="pvBody"></div><div class="pf"><span>Updates as you type</span><span>Full size: press Preview at the top</span></div></div>`;
+}
+function updatePreview(){
+  const box=$("pvBody");if(!box)return;
+  const lang=zhOn()?previewLang:"en", s=D.settings;
+  if(route.v==="doc"){
+    const c=D.categories.find(c=>c.id===route.cat), d=c?.docs?.find(d=>d.id===route.doc);
+    box.className="pb docpage";
+    box.innerHTML=d&&d.pages.length?renderPage(d.pages[activePage],lang):'<p class="note">Add a page to see it here.</p>';
+    const t=$("pvTitle");if(t&&d)t.textContent=`Page ${activePage+1} of ${Math.max(1,d.pages.length)}`;
+  } else {
+    box.className="pb";
+    const cats=D.categories.filter(c=>c.visible!==false);
+    box.innerHTML=`<div class="minikiosk" style="background:${esc(s.colors?.background||"#3f4f86")}">
+      <div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(pick(s.welcome,lang))}</span><span style="opacity:.8">${s.logo?`<img src="${esc(s.logo)}" style="height:18px">`:esc(s.brandName||"")}</span></div>
+      ${route.v==="home"?`<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-top:12px;align-items:center"><div style="aspect-ratio:16/10;border-radius:8px;background:${s.heroImage?`url('${esc(s.heroImage)}') center/cover`:"linear-gradient(#9fc4e4 45%,#3fa7a5 45%)"}"></div>
+        <div><div style="font-size:10px;opacity:.8;margin-bottom:6px">${esc(pick(s.tapPrompt,lang))}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${D.countries.filter(c=>c.visible!==false).map(c=>flag(c,26)).join("")}</div></div></div>`:""}
+      <div class="mt">${cats.map(c=>`<div style="${route.cat===c.id?"outline:2px solid #fff":""}">${icon(c.icon)}${esc(pick(c.name,lang))}</div>`).join("")}</div>
+      <span class="mb" style="background:${esc(s.colors?.button||"#ef5fa7")}">View details →</span></div>`;
+  }
+}
+
+/* ---------------- events: typing ---------------- */
+$("view").addEventListener("input",e=>{
+  const el=e.target;
+  if(el.dataset.path){setAt(el.dataset.path,el.dataset.num?+el.value:el.value);changed();updatePreview();
+    if(/\.(name|title)\.en$/.test(el.dataset.path)){renderNav();const h=document.querySelector("h2.title");if(h&&((route.v==="doc"&&/docs\.\d+\.title\.en$/.test(el.dataset.path))||(route.v==="cat"&&/^categories\.\d+\.name\.en$/.test(el.dataset.path))))h.textContent=el.value||"Untitled";}
+    if(el.type==="color"&&el.dataset.path.startsWith("countries")){const sw=el.closest(".item")?.querySelector(".flag");if(sw){const i=+el.dataset.path.split(".")[1];sw.outerHTML=flag(D.countries[i]);}}}
+  if(el.dataset.bool){setAt(el.dataset.bool,el.checked);changed();
+    if(el.dataset.bool==="settings.showLanguageButton"){if(!el.checked)previewLang="en";render();} else {renderNav();updatePreview();}}
+});
+$("view").addEventListener("change",e=>{const el=e.target;if(el.tagName==="SELECT"&&el.dataset.path){setAt(el.dataset.path,el.dataset.num?+el.value:el.value);changed();updatePreview();if(el.dataset.path.endsWith("direction"))render();}});
+$("view").addEventListener("focusin",e=>{const pc=e.target.closest(".pagecard");if(pc&&+pc.dataset.page!==activePage){activePage=+pc.dataset.page;document.querySelectorAll(".pagecard").forEach(x=>x.classList.toggle("active",+x.dataset.page===activePage));updatePreview();}});
+
+/* ---------------- events: buttons ---------------- */
+$("view").addEventListener("click",e=>{
+  const pl=e.target.closest("[data-pl]");if(pl){previewLang=pl.dataset.pl;document.querySelectorAll("[data-pl]").forEach(b=>b.classList.toggle("on",b===pl));updatePreview();return;}
+  const b=e.target.closest("[data-act]");if(!b||b.disabled)return;act(b.dataset.act,b.dataset,b);
+});
+async function act(a,ds={},el){
+  const ci=D.categories.findIndex(c=>c.id===route.cat);
+  switch(a){
+    case "addCat":{snapshot();const c={id:uid("c"),icon:"info",name:T("New category",""),visible:true,kind:"docs",docs:[]};D.categories.push(c);changed();go({v:"cat",cat:c.id});
+      setTimeout(()=>{const i=document.querySelector('[data-path$=".name.en"]');i&&(i.select(),i.focus());});break;}
+    case "addCountry":{snapshot();D.countries.push({id:uid("k"),name:T("New country",""),stripes:["#1f3f99","#ffffff","#d8343a"],direction:"vertical",visible:true});changed();render();break;}
+    case "addDoc":{snapshot();const d={id:uid("d"),title:T("New item",""),subtitle:T(),visible:true,pages:[{type:"text",heading:T(),body:T(),note:T()}]};D.categories[ci].docs.push(d);changed();go({v:"doc",cat:route.cat,doc:d.id});
+      setTimeout(()=>{const i=document.querySelector('[data-path$=".title.en"]');i&&(i.select(),i.focus());});break;}
+    case "openDoc":go({v:"doc",cat:route.cat,doc:D.categories[ci].docs[+ds.i].id});break;
+    case "backCat":go({v:"cat",cat:route.cat});break;
+    case "addPage":{snapshot();const d=D.categories[ci].docs.find(d=>d.id===route.doc);
+      const p=ds.type==="table"?{type:"table",heading:T(),col1:T("Item","项目"),col2:T("Price","价格"),rows:[{a:T(),b:T()}],note:T()}:ds.type==="image"?{type:"image",heading:T(),src:"",caption:T()}:{type:"text",heading:T(),body:T(),note:T()};
+      d.pages.push(p);activePage=d.pages.length-1;changed();render();
+      setTimeout(()=>document.querySelector(`.pagecard[data-page="${activePage}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}));break;}
+    case "addRow":{getAt(ds.path).push({a:T(),b:T()});changed();render();break;}
+    case "delRow":{snapshot();getAt(ds.path).splice(+ds.i,1);changed();render();toast("Row removed.",true);break;}
+    case "mv":{const arr=getAt(ds.list);move(arr,+ds.i,+ds.d);if(ds.list.endsWith("pages"))activePage=+ds.i+ +ds.d;changed();render();break;}
+    case "del":{
+      const what=ds.list==="categories"?"category":ds.list==="countries"?"country":ds.list.endsWith("docs")?"item":"page";
+      const ok=await ask(`Delete this ${what}?`,`“${ds.name||what}” will be removed${what==="category"?" with everything in it":""}. You can press Undo straight afterwards, and nothing changes on the screen until you publish.`,"Delete");
+      if(!ok)return;snapshot();getAt(ds.list).splice(+ds.i,1);changed();
+      if(what==="category")go({v:"home"});else render();
+      toast(`Deleted ${what}.`,true);break;}
+    case "icon":{setAt(ds.path,ds.val);changed();render();break;}
+    case "color":{setAt(ds.path,ds.val);changed();render();break;}
+    case "clear":{snapshot();setAt(ds.path,"");changed();render();toast("Removed.",true);break;}
+    case "upload":{pickImage(ds.path,ds.kind,el);break;}
+    case "restore":{const ok=await ask("Restore this version?","Your current unpublished changes will be replaced by this version. The screen won't change until you press Publish.","Restore");if(!ok)return;
+      snapshot();try{D=await api("restore",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({key:ds.key})});toast("Version restored. Check it, then press Publish to screen.",true);go({v:"home"});updatePublishState();}catch(e){toast(e.message);}break;}
+  }
+}
+
+/* ---------------- image upload (resized in the browser first) ---------------- */
+let pending=null;
+function pickImage(path,kind,btn){pending={path,kind,btn};$("filePick").value="";$("filePick").click();}
+$("filePick").onchange=async()=>{
+  const f=$("filePick").files[0];if(!f||!pending)return;
+  const {path,kind,btn}=pending;const label=btn.innerHTML;btn.disabled=true;btn.textContent="Uploading…";
+  try{
+    if(!/^image\//.test(f.type))throw new Error("That file isn't a picture. Use a JPG or PNG (save PDFs as a picture first).");
+    const blob=f.type==="image/svg+xml"||f.type==="image/gif"?f:await shrink(f,kind==="logo"?800:1920,kind==="logo"||f.type==="image/png"?"image/png":"image/jpeg");
+    if(blob.size>6*1024*1024)throw new Error("That picture is still too big after shrinking. Try a smaller one.");
+    const r=await api("upload",{method:"POST",headers:{"content-type":blob.type},body:blob});
+    snapshot();setAt(path,r.url);changed();render();toast("Picture uploaded.");
+  }catch(e){if(e.message!=="401"){toast(e.message);btn.innerHTML=label;btn.disabled=false;}}
+};
+function shrink(file,max,type){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));
+  const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);const x=c.getContext("2d");if(type==="image/jpeg"){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);}x.drawImage(img,0,0,c.width,c.height);
+  c.toBlob(b=>b?res(b):rej(new Error("Couldn't read that picture.")),type,.86);URL.revokeObjectURL(img.src);};img.onerror=()=>rej(new Error("Couldn't read that picture. Try a JPG or PNG."));img.src=URL.createObjectURL(file);});}
+
+/* ---------------- history & feedback ---------------- */
+const when=iso=>new Date(iso).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+async function loadHistory(){
+  const box=$("histBox");if(!box)return;
+  try{const list=await api("history");
+    box.innerHTML=list.length?`<table class="data"><thead><tr><th>Published</th><th></th></tr></thead><tbody>${list.map((v,i)=>`<tr><td>${when(v.at)}${i===0?' <span class="chip ok">On the screen now</span>':""}</td><td style="text-align:right"><button class="btn small" data-act="restore" data-key="${esc(v.key)}">Restore</button></td></tr>`).join("")}</tbody></table>`:'<div class="emptybox">Nothing published yet.</div>';
+  }catch(e){box.textContent=e.message;}
+}
+async function loadFeedback(){
+  const box=$("fbBox");if(!box)return;
+  try{const all=await api("feedback");const days=Object.keys(all).sort().reverse();
+    const tot=[0,0,0,0];days.forEach(d=>all[d].forEach((n,i)=>tot[i]+=n));const sum=tot.reduce((a,b)=>a+b,0);const max=Math.max(1,...tot);
+    if(!sum){box.innerHTML='<div class="emptybox">No ratings yet. They appear here as soon as someone taps a face on the screen.</div>';return;}
+    const score=(tot[0]*1+tot[1]*2+tot[2]*3+tot[3]*4)/sum;
+    box.innerHTML=`<div class="row3"><div><div style="font-size:34px;font-weight:800">${sum}</div><div class="hint" style="margin:0">ratings in total</div></div>
+      <div style="margin-left:30px"><div style="font-size:34px;font-weight:800">${score.toFixed(1)} / 4</div><div class="hint" style="margin:0">average score</div></div></div>
+      <div class="bars">${tot.map(n=>`<div style="height:${n/max*100}%" title="${n}"></div>`).join("")}</div><div class="barlbl">${["😞","😐","🙂","😄"].map((f,i)=>`<span>${f}<br><small style="font-size:13px;color:var(--soft)">${tot[i]}</small></span>`).join("")}</div>
+      <h3 style="margin-top:22px">By day</h3><table class="data"><thead><tr><th>Day</th><th>😞</th><th>😐</th><th>🙂</th><th>😄</th></tr></thead><tbody>${days.slice(0,30).map(d=>`<tr><td>${new Date(d).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}</td>${all[d].map(n=>`<td>${n}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }catch(e){box.textContent=e.message;}
+}
+window.addEventListener("beforeunload",e=>{if($("saveStatus").classList.contains("saving")){e.preventDefault();e.returnValue="";}});
+</script>
+</body>
+</html>

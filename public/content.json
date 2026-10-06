@@ -1,0 +1,661 @@
+{
+ "version": 1,
+ "settings": {
+  "brandName": "Your Brand",
+  "logo": "",
+  "heroImage": "",
+  "heroCaption": {
+   "en": "Destination preview",
+   "zh": "目的地预览"
+  },
+  "welcome": {
+   "en": "Welcome to our touchscreen information board",
+   "zh": "欢迎使用我们的触摸屏信息公告"
+  },
+  "tapPrompt": {
+   "en": "Tap a country to start",
+   "zh": "点击国家开始查看信息"
+  },
+  "showLanguageButton": true,
+  "skipCountryStep": false,
+  "idleSeconds": 60,
+  "colors": {
+   "background": "#3f4f86",
+   "button": "#ef5fa7"
+  }
+ },
+ "countries": [
+  {
+   "id": "it",
+   "name": {
+    "en": "Italy",
+    "zh": "意大利"
+   },
+   "stripes": [
+    "#1f9a4a",
+    "#ffffff",
+    "#d8343a"
+   ],
+   "direction": "vertical",
+   "visible": true
+  },
+  {
+   "id": "fr",
+   "name": {
+    "en": "France",
+    "zh": "法国"
+   },
+   "stripes": [
+    "#1f3f99",
+    "#ffffff",
+    "#e03a3e"
+   ],
+   "direction": "vertical",
+   "visible": true
+  },
+  {
+   "id": "es",
+   "name": {
+    "en": "Spain",
+    "zh": "西班牙"
+   },
+   "stripes": [
+    "#c8202f",
+    "#f6c400",
+    "#c8202f"
+   ],
+   "direction": "horizontal",
+   "visible": true
+  }
+ ],
+ "categories": [
+  {
+   "id": "c3",
+   "icon": "check",
+   "name": {
+    "en": "Checklist",
+    "zh": "检查清单"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d1",
+     "title": {
+      "en": "Tourist visa checklist",
+      "zh": "旅游签证材料清单"
+     },
+     "subtitle": {
+      "en": "Short stay, up to 90 days",
+      "zh": "短期停留，最长 90 天"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Tourist visa checklist",
+        "zh": "旅游签证材料清单"
+       },
+       "body": {
+        "en": "- Completed and signed application form\n- Passport valid for at least 3 months after your return, with 2 blank pages\n- Two recent passport photos (35 × 45 mm)\n- Travel insurance with minimum cover of €30,000\n- Return flight booking and hotel reservations\n- Bank statements for the last 3 months",
+        "zh": "- 填写完整并签名的申请表\n- 护照有效期须在返程后至少 3 个月，并有 2 页空白页\n- 近期护照照片两张（35 × 45 毫米）\n- 保额不低于 30,000 欧元的旅行保险\n- 往返机票及酒店预订\n- 最近 3 个月银行流水"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      },
+      {
+       "type": "text",
+       "heading": {
+        "en": "Additional documents",
+        "zh": "其他材料"
+       },
+       "body": {
+        "en": "Depending on your situation you may also need:\n- Employment letter or business registration\n- Invitation letter if staying with family or friends\n- Parental consent for applicants under 18",
+        "zh": "根据您的情况，可能还需要：\n- 在职证明或营业执照\n- 如住在亲友家，需提供邀请函\n- 未满 18 岁申请人需提供父母同意书"
+       },
+       "note": {
+        "en": "Sample content for demonstration only.",
+        "zh": "示例内容，仅供演示。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "d2",
+     "title": {
+      "en": "Business visa checklist",
+      "zh": "商务签证材料清单"
+     },
+     "subtitle": {
+      "en": "Meetings, conferences, trade fairs",
+      "zh": "会议、展会、商务洽谈"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Business visa checklist",
+        "zh": "商务签证材料清单"
+       },
+       "body": {
+        "en": "- Everything on the tourist checklist\n- Invitation letter from the host company\n- Letter from your employer confirming the trip",
+        "zh": "- 旅游签证清单上的全部材料\n- 邀请公司出具的邀请函\n- 雇主出具的出行证明"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c5",
+   "icon": "form",
+   "name": {
+    "en": "Application forms",
+    "zh": "申请表格"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d4",
+     "title": {
+      "en": "Short-stay application form",
+      "zh": "短期签证申请表"
+     },
+     "subtitle": {
+      "en": "Ask staff for a printed copy",
+      "zh": "可向工作人员索取纸质版"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Short-stay application form",
+        "zh": "短期签证申请表"
+       },
+       "body": {
+        "en": "Printed forms are available at the reception desk. Fill in every section in block capitals and sign on the final page.\n\nForms with missing signatures will be returned.",
+        "zh": "纸质申请表可在前台领取。请用大写字母填写所有栏目，并在最后一页签名。\n\n未签名的表格将被退回。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c8",
+   "icon": "fee",
+   "name": {
+    "en": "Fee list",
+    "zh": "费用清单"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d6",
+     "title": {
+      "en": "Visa and service fees",
+      "zh": "签证及服务费用"
+     },
+     "subtitle": {
+      "en": "Payable at the counter",
+      "zh": "在柜台缴纳"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "table",
+       "heading": {
+        "en": "Visa and service fees",
+        "zh": "签证及服务费用"
+       },
+       "col1": {
+        "en": "Item",
+        "zh": "项目"
+       },
+       "col2": {
+        "en": "Fee",
+        "zh": "费用"
+       },
+       "rows": [
+        {
+         "a": {
+          "en": "Short-stay visa (adult)",
+          "zh": "短期签证（成人）"
+         },
+         "b": {
+          "en": "£75.00",
+          "zh": ""
+         }
+        },
+        {
+         "a": {
+          "en": "Short-stay visa (child 6–12)",
+          "zh": "短期签证（6–12 岁儿童）"
+         },
+         "b": {
+          "en": "£40.00",
+          "zh": ""
+         }
+        },
+        {
+         "a": {
+          "en": "Service charge",
+          "zh": "服务费"
+         },
+         "b": {
+          "en": "£22.50",
+          "zh": ""
+         }
+        },
+        {
+         "a": {
+          "en": "Courier return of passport",
+          "zh": "护照快递寄回"
+         },
+         "b": {
+          "en": "£15.00",
+          "zh": ""
+         }
+        },
+        {
+         "a": {
+          "en": "Premium lounge (optional)",
+          "zh": "优质贵宾室（可选）"
+         },
+         "b": {
+          "en": "£55.00",
+          "zh": ""
+         }
+        }
+       ],
+       "note": {
+        "en": "Sample prices for demonstration only.",
+        "zh": "示例价格，仅供演示。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "d7",
+     "title": {
+      "en": "Premium lounge (optional service)",
+      "zh": "优质服务（可选服务）"
+     },
+     "subtitle": {
+      "en": "Faster, more comfortable visit",
+      "zh": "更快捷舒适的办理体验"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Premium lounge",
+        "zh": "优质服务"
+       },
+       "body": {
+        "en": "The premium lounge service includes:\n- Express check-in and checkout\n- Dedicated premium lounge\n- Refreshments\n- Free photocopying, up to 10 pages",
+        "zh": "优质贵宾室服务包括：\n- 快速登记与离开\n- 专属贵宾休息室\n- 茶点\n- 免费复印，最多 10 页"
+       },
+       "note": {
+        "en": "Using the premium lounge does not affect how quickly your application is decided.",
+        "zh": "使用优质服务不会影响签证审批的速度或结果。"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c10",
+   "icon": "cal",
+   "name": {
+    "en": "Holiday list",
+    "zh": "假期列表"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d9",
+     "title": {
+      "en": "Centre closed on these dates",
+      "zh": "中心休息日"
+     },
+     "subtitle": {
+      "en": "2026 calendar",
+      "zh": "2026 年日历"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "table",
+       "heading": {
+        "en": "Centre closed on these dates",
+        "zh": "中心休息日"
+       },
+       "col1": {
+        "en": "Date",
+        "zh": "日期"
+       },
+       "col2": {
+        "en": "Holiday",
+        "zh": "节日"
+       },
+       "rows": [
+        {
+         "a": {
+          "en": "25 Dec 2026",
+          "zh": "2026年12月25日"
+         },
+         "b": {
+          "en": "Christmas Day",
+          "zh": "圣诞节"
+         }
+        },
+        {
+         "a": {
+          "en": "26 Dec 2026",
+          "zh": "2026年12月26日"
+         },
+         "b": {
+          "en": "Boxing Day",
+          "zh": "节礼日"
+         }
+        },
+        {
+         "a": {
+          "en": "1 Jan 2027",
+          "zh": "2027年1月1日"
+         },
+         "b": {
+          "en": "New Year's Day",
+          "zh": "元旦"
+         }
+        }
+       ],
+       "note": {
+        "en": "Sample dates for demonstration only.",
+        "zh": "示例日期，仅供演示。"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c12",
+   "icon": "rules",
+   "name": {
+    "en": "Visa rules",
+    "zh": "签证规则"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d11",
+     "title": {
+      "en": "90/180-day rule",
+      "zh": "90/180 天规则"
+     },
+     "subtitle": {
+      "en": "How long you can stay",
+      "zh": "可停留时长"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "The 90/180-day rule",
+        "zh": "90/180 天规则"
+       },
+       "body": {
+        "en": "A short-stay visa lets you spend up to 90 days in any 180-day period. Days you have already spent in the area during the last 180 days count towards the 90.",
+        "zh": "短期签证允许您在任意 180 天内停留不超过 90 天。过去 180 天内已停留的天数会计入这 90 天。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c14",
+   "icon": "lock",
+   "name": {
+    "en": "Data security",
+    "zh": "数据安全"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d13",
+     "title": {
+      "en": "How we use your data",
+      "zh": "个人信息的使用"
+     },
+     "subtitle": {
+      "en": "Privacy notice",
+      "zh": "隐私声明"
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "How we use your data",
+        "zh": "个人信息的使用"
+       },
+       "body": {
+        "en": "We collect only the information needed to process your application. It is stored securely and shared only with the authority that decides your visa.",
+        "zh": "我们仅收集办理申请所需的信息，并安全保存，只与负责审批签证的机构共享。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c19",
+   "icon": "info",
+   "name": {
+    "en": "Other information",
+    "zh": "其他信息"
+   },
+   "visible": true,
+   "kind": "docs",
+   "docs": [
+    {
+     "id": "d15",
+     "title": {
+      "en": "Important notices",
+      "zh": "重要告知"
+     },
+     "subtitle": {
+      "en": "",
+      "zh": ""
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Please note",
+        "zh": "请注意"
+       },
+       "body": {
+        "en": "We are committed to serving you with courtesy and respect. We ask that you treat our staff in the same manner. We will not serve anyone who uses offensive language or behaves aggressively.",
+        "zh": "我们礼貌和恭敬地向您提供服务，我们也希望您能以同等态度对待我们的员工。我们不会勉强自己向那些言语无礼和行为过激的人提供服务。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      },
+      {
+       "type": "text",
+       "heading": {
+        "en": "For your safety",
+        "zh": "为了您的安全"
+       },
+       "body": {
+        "en": "We record all activity in this area on closed-circuit television.",
+        "zh": "我们通过闭路电视记录此区域的全部活动。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      },
+      {
+       "type": "text",
+       "heading": {
+        "en": "Please note",
+        "zh": "请注意"
+       },
+       "body": {
+        "en": "Use of mobile phones is not permitted at the biometric enrolment booth.\n\nThank you for your cooperation.",
+        "zh": "生物识别信息采集柜台禁止使用手机。\n\n感谢您的理解与配合。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    },
+    {
+     "id": "d16",
+     "title": {
+      "en": "Other notices",
+      "zh": "其他告知"
+     },
+     "subtitle": {
+      "en": "",
+      "zh": ""
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Waiting area",
+        "zh": "候办区"
+       },
+       "body": {
+        "en": "Please wait in the seating area until your ticket number is shown on the screen. Food and drink are not allowed past the security check.",
+        "zh": "请在座位区等候，直到屏幕显示您的号码。安检后禁止携带食物和饮料。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    },
+    {
+     "id": "d17",
+     "title": {
+      "en": "Passport collection",
+      "zh": "护照领取"
+     },
+     "subtitle": {
+      "en": "",
+      "zh": ""
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Passport collection",
+        "zh": "护照领取"
+       },
+       "body": {
+        "en": "Collect your passport between 14:00 and 16:00, Monday to Friday. Bring your receipt and photo ID. Someone else can collect it with a signed letter from you and a copy of your ID.",
+        "zh": "周一至周五 14:00–16:00 可领取护照，请携带收据和带照片的身份证件。他人代领需持您的签名授权书及身份证件复印件。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    },
+    {
+     "id": "d18",
+     "title": {
+      "en": "Track your application",
+      "zh": "查询申请进度"
+     },
+     "subtitle": {
+      "en": "",
+      "zh": ""
+     },
+     "visible": true,
+     "pages": [
+      {
+       "type": "text",
+       "heading": {
+        "en": "Track your application",
+        "zh": "查询申请进度"
+       },
+       "body": {
+        "en": "Enter the reference number printed on your receipt at the tracking page on our website, or ask at the information desk.",
+        "zh": "请在我们网站的查询页面输入收据上的参考编号，或到咨询台询问。"
+       },
+       "note": {
+        "en": "",
+        "zh": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c20",
+   "icon": "like",
+   "name": {
+    "en": "Customer feedback",
+    "zh": "客户反馈"
+   },
+   "visible": true,
+   "kind": "feedback",
+   "docs": [],
+   "question": {
+    "en": "How was your visit today?",
+    "zh": "您今天的体验如何？"
+   },
+   "thanks": {
+    "en": "Thank you for your feedback.",
+    "zh": "感谢您的反馈。"
+   }
+  }
+ ]
+}
