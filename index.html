@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Touch Notice Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one full-height kiosk stage; screens swap in place (home → categories → document list → viewer overlay). Single deliberate look, like a lobby display. */
+:root{
+  --stage-a:#3f4f86; --stage-b:#5b6aa6; --stage-c:#2f3b6b;
+  --ink:#ffffff; --ink-soft:rgba(255,255,255,.78);
+  --glass:rgba(255,255,255,.14); --glass-hi:rgba(255,255,255,.24); --glass-line:rgba(255,255,255,.28);
+  --pink:#ef5fa7; --pink-b:#d9418f;
+  --paper:#ffffff; --paper-ink:#28304a; --paper-soft:#5c6480; --alert:#d23b3b;
+  --font:"Plus Jakarta Sans","Noto Sans SC",system-ui,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--stage-c);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.stage{position:relative;height:100%;display:flex;flex-direction:column;
+  background:radial-gradient(120% 90% at 85% 10%,var(--stage-b),transparent 60%),radial-gradient(90% 80% at 0% 100%,var(--stage-c),transparent 70%),var(--stage-a);
+  padding-inline:clamp(16px,3vw,48px)}
+
+/* top bar */
+.bar{display:flex;align-items:center;gap:16px;padding-block:clamp(14px,2.2vh,26px)}
+.bar h1{font-size:clamp(17px,1.7vw,26px);font-weight:600;margin:0;flex:1;min-width:0;text-wrap:balance}
+.crumb{display:flex;align-items:center;gap:10px}
+.crumb .flag{width:34px;height:34px}
+.pill{background:#fff;color:#3f4f86;font-weight:700;font-size:14px;padding:8px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.logo{display:flex;align-items:center;gap:8px;padding-left:14px;border-left:1px solid var(--glass-line);font-size:12px;line-height:1.15;color:var(--ink-soft);font-weight:600}
+.logo i{width:30px;height:30px;border-radius:50%;border:2px dashed var(--ink-soft);display:grid;place-items:center;font-style:normal;font-size:10px}
+.navbtn{display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--glass-line);padding:9px 16px;border-radius:12px;font-weight:600;font-size:15px}
+.navbtn svg{width:18px;height:18px}
+
+main{flex:1;min-height:0;position:relative}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;animation:in .35s ease}
+.screen[hidden]{display:none!important}
+@keyframes in{from{opacity:.0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* home */
+.home{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:clamp(20px,3vw,48px);align-items:center;padding-bottom:4vh}
+.hero{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:16/10;max-width:100%;box-shadow:0 18px 40px rgba(10,15,40,.35)}
+.hero canvas{width:100%;height:100%;display:block}
+.hero .cap{position:absolute;left:18px;bottom:16px;background:rgba(20,25,50,.55);backdrop-filter:blur(6px);padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600}
+.pick{display:flex;flex-direction:column;gap:18px}
+.pick p{margin:0;font-size:clamp(15px,1.3vw,19px);color:var(--ink-soft);display:flex;gap:8px;align-items:center}
+.countries{display:flex;flex-wrap:wrap;gap:22px}
+.country{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700;font-size:16px;padding:10px;border-radius:16px;transition:background .2s}
+.country:active{background:var(--glass)}
+.flag{width:84px;height:84px;border-radius:50%;overflow:hidden;display:flex;box-shadow:0 0 0 3px rgba(255,255,255,.85),0 8px 18px rgba(0,0,0,.3)}
+.flag span{flex:1}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 0 0 rgba(255,255,255,.35)}50%{box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 0 14px rgba(255,255,255,0)}}
+
+/* category grid */
+.gridwrap{flex:1;display:grid;place-items:center;padding-bottom:4vh}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2vw,28px);width:min(1100px,100%)}
+.tile{aspect-ratio:1.25;max-width:100%;border-radius:22px;background:linear-gradient(160deg,var(--glass-hi),var(--glass));border:1px solid var(--glass-line);
+  box-shadow:0 10px 26px rgba(10,15,40,.25),inset 0 1px 0 rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  font-weight:700;font-size:clamp(14px,1.35vw,20px);transition:transform .15s,background .15s}
+.tile svg{width:clamp(34px,3.6vw,58px);height:auto;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tile:active{transform:scale(.96);background:var(--glass-hi)}
+
+/* document list */
+.listwrap{flex:1;min-height:0;display:flex;gap:18px;padding-bottom:3vh}
+.list{flex:1;min-width:0;overflow-y:auto;scroll-behavior:smooth;display:flex;flex-direction:column;gap:14px;padding-right:4px;scrollbar-width:none}
+.list::-webkit-scrollbar{display:none}
+.row{display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,var(--glass-hi),var(--glass));border:1px solid var(--glass-line);border-radius:16px;padding:18px 22px;min-height:74px}
+.row b{flex:1;font-size:clamp(16px,1.5vw,22px);font-weight:600;min-width:0}
+.row small{display:block;font-weight:500;font-size:13px;color:var(--ink-soft);margin-top:3px}
+.go{background:linear-gradient(180deg,var(--pink),var(--pink-b));color:#fff;font-weight:700;padding:11px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:0 4px 12px rgba(217,65,143,.4)}
+.go svg{width:16px;height:16px}
+.scroller{display:flex;flex-direction:column;justify-content:center;gap:10px}
+.scroller button{width:48px;height:48px;border-radius:50%;background:rgba(20,25,50,.45);border:2px solid #fff;display:grid;place-items:center}
+.scroller svg{width:20px;height:20px}
+
+/* viewer overlay */
+.viewer{position:fixed;inset:0;background:rgba(15,20,40,.55);backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px;z-index:10}
+.viewer[hidden]{display:none!important}
+.sheet{width:min(1100px,100%);height:min(86vh,760px);background:var(--paper);color:var(--paper-ink);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.sheet .page{flex:1;min-height:0;overflow:auto;padding:clamp(20px,4vw,56px) clamp(20px,5vw,72px);position:relative}
+.page .mark{position:absolute;top:18px;right:24px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--paper-soft)}
+.page .mark i{width:26px;height:26px;border-radius:50%;border:2px dashed var(--paper-soft);display:grid;place-items:center;font-style:normal;font-size:8px}
+.page h2{color:var(--alert);margin:0 0 10px;font-size:clamp(22px,2.4vw,34px)}
+.page h3{color:var(--alert);margin:26px 0 8px;font-size:clamp(18px,1.8vw,24px)}
+.page p,.page li{font-size:clamp(15px,1.4vw,20px);line-height:1.55;max-width:62ch;margin:0 0 8px}
+.page ul{padding-left:22px;margin:6px 0 12px}
+.page table{border-collapse:collapse;font-size:clamp(14px,1.3vw,18px);margin-top:8px;font-variant-numeric:tabular-nums;min-width:min(520px,100%)}
+.page td,.page th{padding:9px 16px;border-bottom:1px solid #e3e6ef;text-align:left}
+.page th{color:var(--paper-soft);font-weight:600}
+.page .note{font-size:13px;color:var(--paper-soft);margin-top:18px}
+.ctrl{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px;border-top:1px solid #eceef5;flex-wrap:wrap}
+.ctrl button{display:flex;align-items:center;gap:8px;background:#fff;color:var(--paper-ink);border:1.5px solid #d7c3dc;border-radius:999px;padding:8px 18px;font-weight:600;font-size:15px}
+.ctrl button svg{width:16px;height:16px;color:var(--pink-b)}
+.ctrl button:disabled{opacity:.35}
+.ctrl .count{font-size:14px;color:var(--paper-soft);font-variant-numeric:tabular-nums;min-width:60px;text-align:center}
+.loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--paper)}
+.loading[hidden]{display:none!important}
+.loading div{background:#2b2f3c;color:#fff;border-radius:12px;padding:22px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;font-weight:600}
+.spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* feedback */
+.faces{display:flex;gap:20px;flex-wrap:wrap;margin:20px 0}
+.faces button{font-size:clamp(40px,5vw,64px);background:#f3f4f9;border-radius:18px;padding:12px 18px;line-height:1;border:2px solid transparent}
+.faces button[aria-pressed="true"]{border-color:var(--pink-b);background:#fde8f3}
+.thanks{color:#2f8a4b;font-weight:700}
+
+/* idle toast + prototype tag */
+.idle{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(15,20,40,.85);padding:12px 20px;border-radius:12px;font-weight:600;z-index:20;display:flex;gap:14px;align-items:center}
+.idle[hidden]{display:none!important}
+.idle button{background:#fff;color:var(--stage-a);border-radius:8px;padding:6px 12px;font-weight:700}
+.proto{position:fixed;right:12px;bottom:10px;font-size:11px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;z-index:5}
+
+@media (max-width:860px){
+  .home{grid-template-columns:1fr;align-content:start;overflow:auto}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gridwrap{place-items:start center;overflow:auto}
+  .logo{display:none}
+  .scroller{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <header class="bar">
+    <div class="crumb" id="crumb" hidden></div>
+    <h1 id="title"></h1>
+    <button class="navbtn" id="back" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg><span data-t="back"></span></button>
+    <button class="navbtn" id="homeBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="home"></span></button>
+    <button class="pill" id="lang">中文</button>
+    <div class="logo"><i>LOGO</i><span>Your<br>Brand</span></div>
+  </header>
+
+  <main>
+    <section class="screen home" id="s-home">
+      <div class="hero"><canvas id="sea" width="960" height="600"></canvas><span class="cap" id="heroCap"></span></div>
+      <div class="pick">
+        <p><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg><span data-t="tap"></span></p>
+        <div class="countries" id="countries"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-cats" hidden>
+      <div class="gridwrap"><div class="tiles" id="tiles"></div></div>
+    </section>
+
+    <section class="screen" id="s-list" hidden>
+      <div class="listwrap">
+        <div class="list" id="list"></div>
+        <div class="scroller">
+          <button id="up" aria-label="Scroll up"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M6 15l6-6 6 6"/></svg></button>
+          <button id="down" aria-label="Scroll down"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="viewer" id="viewer" hidden>
+  <div class="sheet">
+    <div class="page" id="page"></div>
+    <div class="ctrl">
+      <button id="prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span data-t="prev"></span></button>
+      <span class="count" id="count"></span>
+      <button id="next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span data-t="next"></span></button>
+      <button id="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg><span data-t="close"></span></button>
+    </div>
+  </div>
+  <div class="loading" id="loading" hidden><div><span class="spin"></span><span data-t="loading"></span></div></div>
+</div>
+
+<div class="idle" id="idle" hidden><span id="idleTxt"></span><button id="stay" data-t="stay"></button></div>
+<div class="proto">Prototype · sample content</div>
+
+<script>
+/* ---------- CONTENT (edit this to change what the kiosk shows) ---------- */
+const UI={
+ en:{welcome:"Welcome to our touchscreen information board",tap:"Tap a country to start",back:"Back",home:"Home",prev:"Previous",next:"Next",close:"Close",loading:"Loading…",view:"View details",stay:"I'm still here",idle:s=>`No activity. Returning to the start in ${s}s`,lang:"中文",hero:"Destination preview",page:(a,b)=>`${a} / ${b}`},
+ zh:{welcome:"欢迎使用我们的触摸屏信息公告",tap:"点击国家开始查看信息",back:"返回",home:"首页",prev:"左翻页",next:"右翻页",close:"关闭",loading:"加载中…",view:"查看详情",stay:"继续使用",idle:s=>`无操作，${s} 秒后返回首页`,lang:"English",hero:"目的地预览",page:(a,b)=>`${a} / ${b}`}
+};
+const COUNTRIES=[
+ {id:"it",name:{en:"Italy",zh:"意大利"},flag:["#1f9a4a","#fff","#d8343a"],dir:"row"},
+ {id:"fr",name:{en:"France",zh:"法国"},flag:["#1f3f99","#fff","#e03a3e"],dir:"row"},
+ {id:"es",name:{en:"Spain",zh:"西班牙"},flag:["#c8202f","#f6c400","#c8202f"],dir:"column"}
+];
+const I={ /* line icons */
+ check:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v3H9zM8.5 11l1.5 1.5 3-3M8.5 16.5l1.5 1.5 3-3"/>',
+ form:'<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14h7M9 17h4"/>',
+ fee:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M14.5 8.5a2.5 2.5 0 0 0-5 0c0 3 0 4-1.5 6h7M8.5 12h5"/>',
+ cal:'<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h2M14 14h2M8 17h2"/>',
+ rules:'<rect x="4" y="3" width="13" height="18" rx="2"/><path d="M8 8h5M8 12h5M8 16h3"/><path d="M15 15l5-5 1.5 1.5-5 5-2 .5z"/>',
+ lock:'<rect x="3" y="4" width="13" height="14" rx="2"/><path d="M6 8h7M6 11h7M6 14h3"/><rect x="14" y="13" width="7" height="7" rx="1"/><path d="M15.5 13v-1.5a2 2 0 0 1 4 0V13"/>',
+ info:'<path d="M8 7V4h11v13h-3"/><rect x="5" y="7" width="11" height="14" rx="1"/><path d="M8 12h5M8 15h5M8 18h3"/>',
+ like:'<path d="M7 11v9H4v-9zM7 11l4-7c1.5 0 2.5 1 2 3l-1 3h6a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7"/><path d="M18 2l.6 1.4L20 4l-1.4.6L18 6l-.6-1.4L16 4l1.4-.6zM21 7l.4.9.9.4-.9.4L21 10l-.4-.9-.9-.4.9-.4z"/>'
+};
+const T=(en,zh)=>({en,zh});
+const CATS=[
+ {id:"checklist",icon:"check",name:T("Checklist","检查清单")},
+ {id:"forms",icon:"form",name:T("Application forms","申请表格")},
+ {id:"fees",icon:"fee",name:T("Fee list","费用清单")},
+ {id:"holidays",icon:"cal",name:T("Holiday list","假期列表")},
+ {id:"rules",icon:"rules",name:T("Visa rules","签证规则")},
+ {id:"data",icon:"lock",name:T("Data security","数据安全")},
+ {id:"other",icon:"info",name:T("Other information","其他信息")},
+ {id:"feedback",icon:"like",name:T("Customer feedback","客户反馈")}
+];
+/* Each category holds documents; each document holds pages (HTML). Same content used for every country in this prototype. */
+const P=(en,zh)=>({en,zh});
+const DOCS={
+ checklist:[
+  {t:T("Tourist visa checklist","旅游签证材料清单"),s:T("Short stay, up to 90 days","短期停留，最长 90 天"),pages:[
+   P(`<h2>Tourist visa checklist</h2><ul><li>Completed and signed application form</li><li>Passport valid for at least 3 months after your return, with 2 blank pages</li><li>Two recent passport photos (35 × 45 mm)</li><li>Travel insurance with minimum cover of €30,000</li><li>Return flight booking and hotel reservations</li><li>Bank statements for the last 3 months</li></ul>`,
+     `<h2>旅游签证材料清单</h2><ul><li>填写完整并签名的申请表</li><li>护照有效期须在返程后至少 3 个月，并有 2 页空白页</li><li>近期护照照片两张（35 × 45 毫米）</li><li>保额不低于 30,000 欧元的旅行保险</li><li>往返机票及酒店预订</li><li>最近 3 个月银行流水</li></ul>`),
+   P(`<h2>Additional documents</h2><p>Depending on your situation you may also need:</p><ul><li>Employment letter or business registration</li><li>Invitation letter if staying with family or friends</li><li>Parental consent for applicants under 18</li></ul><p class="note">Sample content for demonstration only.</p>`,
+     `<h2>其他材料</h2><p>根据您的情况，可能还需要：</p><ul><li>在职证明或营业执照</li><li>如住在亲友家，需提供邀请函</li><li>未满 18 岁申请人需提供父母同意书</li></ul><p class="note">示例内容，仅供演示。</p>`)
+  ]},
+  {t:T("Business visa checklist","商务签证材料清单"),s:T("Meetings, conferences, trade fairs","会议、展会、商务洽谈"),pages:[
+   P(`<h2>Business visa checklist</h2><ul><li>Everything on the tourist checklist</li><li>Invitation letter from the host company</li><li>Letter from your employer confirming the trip</li></ul>`,`<h2>商务签证材料清单</h2><ul><li>旅游签证清单上的全部材料</li><li>邀请公司出具的邀请函</li><li>雇主出具的出行证明</li></ul>`)
+  ]}
+ ],
+ forms:[
+  {t:T("Short-stay application form","短期签证申请表"),s:T("Ask staff for a printed copy","可向工作人员索取纸质版"),pages:[
+   P(`<h2>Short-stay application form</h2><p>Printed forms are available at the reception desk. Fill in every section in block capitals and sign on the final page.</p><p>Forms with missing signatures will be returned.</p>`,`<h2>短期签证申请表</h2><p>纸质申请表可在前台领取。请用大写字母填写所有栏目，并在最后一页签名。</p><p>未签名的表格将被退回。</p>`)
+  ]}
+ ],
+ fees:[
+  {t:T("Visa and service fees","签证及服务费用"),s:T("Payable at the counter","在柜台缴纳"),pages:[
+   P(`<h2>Visa and service fees</h2><table><tr><th>Item</th><th>Fee</th></tr><tr><td>Short-stay visa (adult)</td><td>£75.00</td></tr><tr><td>Short-stay visa (child 6–12)</td><td>£40.00</td></tr><tr><td>Service charge</td><td>£22.50</td></tr><tr><td>Courier return of passport</td><td>£15.00</td></tr><tr><td>Premium lounge (optional)</td><td>£55.00</td></tr></table><p class="note">Sample prices for demonstration only.</p>`,
+     `<h2>签证及服务费用</h2><table><tr><th>项目</th><th>费用</th></tr><tr><td>短期签证（成人）</td><td>£75.00</td></tr><tr><td>短期签证（6–12 岁儿童）</td><td>£40.00</td></tr><tr><td>服务费</td><td>£22.50</td></tr><tr><td>护照快递寄回</td><td>£15.00</td></tr><tr><td>优质贵宾室（可选）</td><td>£55.00</td></tr></table><p class="note">示例价格，仅供演示。</p>`)
+  ]},
+  {t:T("Premium lounge (optional service)","优质服务（可选服务）"),s:T("Faster, more comfortable visit","更快捷舒适的办理体验"),pages:[
+   P(`<h2>Premium lounge</h2><p>The premium lounge service includes:</p><ul><li>Express check-in and checkout</li><li>Dedicated premium lounge</li><li>Refreshments</li><li>Free photocopying, up to 10 pages</li></ul><p class="note">Using the premium lounge does not affect how quickly your application is decided.</p>`,
+     `<h2>优质服务</h2><p>优质贵宾室服务包括：</p><ul><li>快速登记与离开</li><li>专属贵宾休息室</li><li>茶点</li><li>免费复印，最多 10 页</li></ul><p class="note">使用优质服务不会影响签证审批的速度或结果。</p>`)
+  ]}
+ ],
+ holidays:[
+  {t:T("Centre closed on these dates","中心休息日"),s:T("2026 calendar","2026 年日历"),pages:[
+   P(`<h2>Centre closed on these dates</h2><table><tr><th>Date</th><th>Holiday</th></tr><tr><td>25 Dec 2026</td><td>Christmas Day</td></tr><tr><td>26 Dec 2026</td><td>Boxing Day</td></tr><tr><td>1 Jan 2027</td><td>New Year's Day</td></tr></table><p class="note">Sample dates for demonstration only.</p>`,
+     `<h2>中心休息日</h2><table><tr><th>日期</th><th>节日</th></tr><tr><td>2026年12月25日</td><td>圣诞节</td></tr><tr><td>2026年12月26日</td><td>节礼日</td></tr><tr><td>2027年1月1日</td><td>元旦</td></tr></table><p class="note">示例日期，仅供演示。</p>`)
+  ]}
+ ],
+ rules:[
+  {t:T("90/180-day rule","90/180 天规则"),s:T("How long you can stay","可停留时长"),pages:[
+   P(`<h2>The 90/180-day rule</h2><p>A short-stay visa lets you spend up to 90 days in any 180-day period. Days you have already spent in the area during the last 180 days count towards the 90.</p>`,`<h2>90/180 天规则</h2><p>短期签证允许您在任意 180 天内停留不超过 90 天。过去 180 天内已停留的天数会计入这 90 天。</p>`)
+  ]}
+ ],
+ data:[
+  {t:T("How we use your data","个人信息的使用"),s:T("Privacy notice","隐私声明"),pages:[
+   P(`<h2>How we use your data</h2><p>We collect only the information needed to process your application. It is stored securely and shared only with the authority that decides your visa.</p>`,`<h2>个人信息的使用</h2><p>我们仅收集办理申请所需的信息，并安全保存，只与负责审批签证的机构共享。</p>`)
+  ]}
+ ],
+ other:[
+  {t:T("Important notices","重要告知"),pages:[
+   P(`<h2>Please note</h2><h3>Notice</h3><p>We are committed to serving you with courtesy and respect. We ask that you treat our staff in the same manner. We will not serve anyone who uses offensive language or behaves aggressively.</p>`,`<h2>请注意</h2><p>我们礼貌和恭敬地向您提供服务，我们也希望您能以同等态度对待我们的员工。我们不会勉强自己向那些言语无礼和行为过激的人提供服务。</p>`),
+   P(`<h2>For your safety</h2><p>We record all activity in this area on closed-circuit television.</p>`,`<h2>为了您的安全</h2><p>我们通过闭路电视记录此区域的全部活动。</p>`),
+   P(`<h2>Please note</h2><h3>Notice</h3><p>Use of mobile phones is not permitted at the biometric enrolment booth.</p><p>Thank you for your cooperation.</p>`,`<h2>请注意</h2><p>生物识别信息采集柜台禁止使用手机。</p><p>感谢您的理解与配合。</p>`)
+  ]},
+  {t:T("Other notices","其他告知"),pages:[
+   P(`<h2>Waiting area</h2><p>Please wait in the seating area until your ticket number is shown on the screen. Food and drink are not allowed past the security check.</p>`,`<h2>候办区</h2><p>请在座位区等候，直到屏幕显示您的号码。安检后禁止携带食物和饮料。</p>`)
+  ]},
+  {t:T("Passport collection","护照领取"),pages:[
+   P(`<h2>Passport collection</h2><p>Collect your passport between 14:00 and 16:00, Monday to Friday. Bring your receipt and photo ID. Someone else can collect it with a signed letter from you and a copy of your ID.</p>`,`<h2>护照领取</h2><p>周一至周五 14:00–16:00 可领取护照，请携带收据和带照片的身份证件。他人代领需持您的签名授权书及身份证件复印件。</p>`)
+  ]},
+  {t:T("Track your application","查询申请进度"),pages:[
+   P(`<h2>Track your application</h2><p>Enter the reference number printed on your receipt at the tracking page on our website, or ask at the information desk.</p>`,`<h2>查询申请进度</h2><p>请在我们网站的查询页面输入收据上的参考编号，或到咨询台询问。</p>`)
+  ]}
+ ],
+ feedback:[
+  {t:T("Rate your visit today","评价您今天的体验"),feedback:true,pages:[P("","")]}
+ ]
+};
+/* ---------- APP ---------- */
+const IDLE_SECONDS=60, WARN_SECONDS=10;
+let lang="en", country=null, cat=null, doc=null, pg=0, rating=null;
+const $=id=>document.getElementById(id);
+const t=k=>UI[lang][k];
+
+function show(screen){for(const s of ["home","cats","list"])$("s-"+s).hidden=s!==screen;state.screen=screen;renderBar();}
+const state={screen:"home"};
+
+function flagHTML(c,size){return `<span class="flag" style="flex-direction:${c.dir};${size?`width:${size}px;height:${size}px;box-shadow:0 0 0 2px #fff`:""}">${c.flag.map((col,i)=>`<span style="background:${col};${c.dir==="column"&&i===1?"flex:2":""}"></span>`).join("")}</span>`}
+
+function renderBar(){
+  const s=state.screen;
+  $("back").hidden=s==="home"; $("homeBtn").hidden=s==="home";
+  $("crumb").hidden=s==="home";
+  if(s==="home"){$("title").textContent=t("welcome");}
+  else{
+    $("crumb").innerHTML=flagHTML(country,34);
+    $("title").textContent=country.name[lang]+(s==="list"?" · "+cat.name[lang]:"");
+  }
+  $("lang").textContent=t("lang");
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  $("heroCap").textContent=t("hero");
+}
+function renderCountries(){
+  $("countries").innerHTML=COUNTRIES.map((c,i)=>`<button class="country" data-c="${c.id}">${flagHTML(c).replace('class="flag"',`class="flag${i===0?" pulse":""}"`)}<span>${c.name[lang]}</span></button>`).join("");
+}
+function renderTiles(){
+  $("tiles").innerHTML=CATS.map(c=>`<button class="tile" data-cat="${c.id}"><svg viewBox="0 0 24 24">${I[c.icon]}</svg><span>${c.name[lang]}</span></button>`).join("");
+}
+function renderList(){
+  $("list").innerHTML=DOCS[cat.id].map((d,i)=>`<div class="row"><b>${d.t[lang]}${d.s?`<small>${d.s[lang]}</small>`:""}</b><button class="go" data-doc="${i}">${t("view")}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>`).join("");
+  $("list").scrollTop=0;
+}
+function renderAll(){renderBar();renderCountries();renderTiles();if(cat)renderList();if(!$("viewer").hidden)renderPage();}
+
+function openDoc(i){
+  doc=DOCS[cat.id][i]; pg=0; rating=null;
+  $("viewer").hidden=false; $("loading").hidden=false;
+  setTimeout(()=>{$("loading").hidden=true;renderPage();},650);
+}
+function renderPage(){
+  const mark=`<div class="mark"><i>LOGO</i>Your Brand</div>`;
+  if(doc.feedback){
+    const faces=["😞","😐","🙂","😄"];
+    $("page").innerHTML=mark+`<h2>${doc.t[lang]}</h2><p>${lang==="en"?"Tap a face to tell us how we did.":"请点击表情，告诉我们您的感受。"}</p><div class="faces">${faces.map((f,i)=>`<button data-rate="${i}" aria-pressed="${rating===i}">${f}</button>`).join("")}</div>${rating!==null?`<p class="thanks">${lang==="en"?"Thank you for your feedback.":"感谢您的反馈。"}</p>`:""}<p class="note">${lang==="en"?"In the prototype, ratings are not saved.":"原型中不保存评分。"}</p>`;
+  } else $("page").innerHTML=mark+doc.pages[pg][lang];
+  $("page").scrollTop=0;
+  $("count").textContent=t("page")(pg+1,doc.pages.length);
+  $("prev").disabled=pg===0; $("next").disabled=pg>=doc.pages.length-1;
+}
+function closeDoc(){$("viewer").hidden=true;doc=null;}
+function goHome(){closeDoc();country=null;cat=null;show("home");}
+
+/* events */
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-c]"); if(c){country=COUNTRIES.find(x=>x.id===c.dataset.c);show("cats");return;}
+  const k=e.target.closest("[data-cat]"); if(k){cat=CATS.find(x=>x.id===k.dataset.cat);renderList();show("list");return;}
+  const d=e.target.closest("[data-doc]"); if(d){openDoc(+d.dataset.doc);return;}
+  const r=e.target.closest("[data-rate]"); if(r){rating=+r.dataset.rate;renderPage();return;}
+});
+$("back").onclick=()=>{if(state.screen==="list"){cat=null;show("cats");}else goHome();};
+$("homeBtn").onclick=goHome;
+$("lang").onclick=()=>{lang=lang==="en"?"zh":"en";document.documentElement.lang=lang==="en"?"en":"zh-CN";renderAll();};
+$("prev").onclick=()=>{if(pg>0){pg--;renderPage();}};
+$("next").onclick=()=>{if(pg<doc.pages.length-1){pg++;renderPage();}};
+$("close").onclick=closeDoc;
+$("viewer").addEventListener("click",e=>{if(e.target===$("viewer"))closeDoc();});
+$("up").onclick=()=>$("list").scrollBy({top:-240});
+$("down").onclick=()=>$("list").scrollBy({top:240});
+
+/* idle reset: back to start after inactivity */
+let last=Date.now();
+["pointerdown","keydown","wheel","touchstart"].forEach(ev=>addEventListener(ev,()=>{last=Date.now();$("idle").hidden=true;},{passive:true}));
+$("stay").onclick=()=>{last=Date.now();$("idle").hidden=true;};
+setInterval(()=>{
+  if(state.screen==="home"&&$("viewer").hidden){$("idle").hidden=true;return;}
+  const left=IDLE_SECONDS-Math.floor((Date.now()-last)/1000);
+  if(left<=0){goHome();$("idle").hidden=true;last=Date.now();}
+  else if(left<=WARN_SECONDS){$("idle").hidden=false;$("idleTxt").textContent=t("idle")(left);}
+},500);
+
+/* attract-loop hero: a drawn harbour scene with moving water (stands in for a photo/video) */
+(function(){
+  const cv=$("sea"),x=cv.getContext("2d"),W=cv.width,H=cv.height;
+  const rnd=(s=>()=>(s=(s*16807)%2147483647)/2147483647)(7);
+  const houses=[];let px=0;
+  while(px<W){const w=30+rnd()*50,h=60+rnd()*110;houses.push({x:px,w,h,c:["#c9744c","#d98a5b","#b8603f","#e3a06d","#a9553a","#e9c39b"][Math.floor(rnd()*6)]});px+=w-4;}
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function draw(time){
+    const g=x.createLinearGradient(0,0,0,H*.5);g.addColorStop(0,"#9fc4e4");g.addColorStop(1,"#e7eef3");x.fillStyle=g;x.fillRect(0,0,W,H);
+    const hz=H*.48;
+    x.fillStyle="#b7c7d3";x.fillRect(0,hz-30,W,30);
+    houses.forEach(h=>{const y=hz+40-h.h;x.fillStyle=h.c;x.fillRect(h.x,y,h.w,h.h);x.fillStyle="rgba(0,0,0,.18)";for(let wy=y+12;wy<hz+30;wy+=22)for(let wx=h.x+8;wx<h.x+h.w-8;wx+=14)x.fillRect(wx,wy,6,9);x.fillStyle="#8e4630";x.fillRect(h.x-2,y-6,h.w+4,8);});
+    // dome
+    x.fillStyle="#efe9dc";x.fillRect(W*.62,hz-110,120,150);x.beginPath();x.arc(W*.62+60,hz-110,62,Math.PI,0);x.fill();x.fillRect(W*.62+52,hz-200,16,30);
+    const wg=x.createLinearGradient(0,hz+40,0,H);wg.addColorStop(0,"#3fa7a5");wg.addColorStop(1,"#1d6f86");x.fillStyle=wg;x.fillRect(0,hz+40,W,H);
+    x.strokeStyle="rgba(255,255,255,.35)";x.lineWidth=2;
+    for(let i=0;i<14;i++){const y=hz+60+i*22;x.beginPath();for(let xx=0;xx<=W;xx+=20){const yy=y+Math.sin(xx/40+time/700+i)*3;xx?x.lineTo(xx,yy):x.moveTo(xx,yy);}x.stroke();}
+    const bx=((time/30)%(W+120))-60;x.fillStyle="#fff";x.beginPath();x.moveTo(bx,hz+150);x.lineTo(bx+60,hz+150);x.lineTo(bx+48,hz+164);x.lineTo(bx+8,hz+164);x.fill();
+    if(!reduce)requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+renderAll(); show("home");
+</script>
+</body>
+</html>
